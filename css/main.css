@@ -1,0 +1,12 @@
+.canvas-container{
+	width: 735px;
+	height: 735px;
+	border: solid gray 2px;
+	border-radius: 15px;
+	box-shadow: gray;
+}
+
+.display-canvas{
+	margin: auto;
+    display: block;
+}
