@@ -2,6 +2,8 @@
 const canvas = document.getElementById("canvas");
 console.log(canvas);
 const ctx = canvas.getContext("2d");
+const cw = 720;
+const ch = 720;
 
 //Declaring temporary values for simulations
 var g = 9.8/60;
@@ -11,12 +13,15 @@ var a_1 = Math.PI/2 ;
 var a_2 = Math.PI ;
 const anchor_x = 360;
 const anchor_y = 200;
-var xpath = [];
-var ypath = [];
-var img_data = ctx.createImageData(720, 720);
+var kin_energy, pot_energy;
+x = true;
+var img_data = ctx.getImageData(0, 0, cw, ch);;
 var old_x;
 var old_y;
-ctx.save();
+
+//ctx.save();
+
+
 //Either create objects to manage pendulums or manage variables only (object method might be easier to manage)
 p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:40, acc:0 };
 p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:40, acc:0 };
@@ -59,6 +64,7 @@ function UpdatePhysics() {
     old_x = p2.x;
     old_y = p2.y;
     
+    
     p2.x = p2.l * Math.sin(p2.a) + p1.x;
     p2.y = p2.l * Math.cos(p2.a) + p1.y;
 
@@ -69,7 +75,12 @@ function UpdatePhysics() {
 
     p2.a += p2.vel;
 
-
+    // Find formulae for energy and forces in the system
+    /*
+    kin_energy = 0.5 * p1.mass * p1.l * p1.l * p1.vel * p1.vel + 0.5 * p2.mass * (p1.l * p1.l * p1.vel * p1.vel + p2.l * p2.l * p2.vel * p2.vel + 2 * p1.l * p2.l * p1.vel * p2.vel * Math.cos(p1.a - p2.a));
+    pot_energy = -(p1.mass + p2.mass) * 9.8 * p1.l * Math.cos(p1.a) - p2.mass * 9.8 * p2.l * Math.cos(p2.a);
+    console.log("total: " + (pot_energy));*/
+    
 }
 
 function UpdateCanvas() {
@@ -77,6 +88,8 @@ function UpdateCanvas() {
 
     function Clear() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        console.log('c');
+        ctx.moveTo(p2.x, p2.y);
 
     }
 
@@ -96,18 +109,29 @@ function UpdateCanvas() {
         ctx.fill();
     }
     Clear();
-    ctx.restore();
 
-    ctx.moveTo(old_x, old_y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.stroke();
-
-    ctx.save();
-
+    if (x) {
+        ctx.putImageData(img_data, 0, 0);
+        ctx.moveTo(old_x, old_y);
+        ctx.beginPath();
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+        //ctx.fillRect(p2.x, p2.y, 5, 5);
+        img_data = ctx.getImageData(0, 0, cw, ch);
+    }
+    else {
+        ctx.putImageData(img_data, 0, 0);
+        ctx.beginPath();
+        ctx.moveTo(old_x, old_y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+        //ctx.fillRect(p2.x, p2.y, 5, 5);
+        img_data = ctx.getImageData(0, 0, cw, ch);
+    }
 
 
     DrawObjects();
-
+    x = false;
 
 }
 
