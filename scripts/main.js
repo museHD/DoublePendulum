@@ -1,6 +1,5 @@
 //Reference to canvas
 const canvas = document.getElementById("canvas");
-console.log(canvas);
 const ctx = canvas.getContext("2d");
 const cw = 720;
 const ch = 720;
@@ -19,6 +18,7 @@ var prev_update = Date.now();
 //Declaring initial variables to be used 
 var kin_energy, pot_energy;
 firstframe = true;
+var paused = false;
 var img_data = ctx.getImageData(0, 0, cw, ch);;
 var old_x;
 var old_y;
@@ -27,16 +27,17 @@ const n_eqns = 4; //4 equations to solve;
 var input = new Array(n_eqns);
 var output = new Array(n_eqns);
 var current = new Array(n_eqns);
-
+var laststate;
 
 
 
 //Either create objects to manage pendulums or manage variables only (object method might be easier to manage)
-p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:40, acc:0 };
-p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:40, acc:0 };
+p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:10, acc:0 };
+p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:10, acc:0 };
 
 function RK(t, inp, out, h) {
     //Either implement Runge-Kutta differential equation function or import existing algo
+    //Implement Runge-Kutta integration to provide more accurate angles
 
     var yt = [];
     var k1 = [], k2 = [], k3 = [], k4 = [];
@@ -44,28 +45,30 @@ function RK(t, inp, out, h) {
     hh = 0.5 * h;
     xh = t + hh;
 
-    derivatives(inp, current);
+    //Values are hard-coded according to the Runge-Kutta integrator.
+
+    Derivatives(inp, current);
     for (i = 0; i < n_eqns; i++)
     {
         k1[i] = h*current[i];
         yt[i] = inp[i] + 0.5*k1[i];
     }
 
-    derivatives(yt, current);
+    Derivatives(yt, current);
     for (i = 0; i < n_eqns; i++)
     {
         k2[i] = h*current[i];
         yt[i] = inp[i] + 0.5*k2[i];
     } 
 
-    derivatives(yt, current);
+    Derivatives(yt, current);
     for (i = 0; i < n_eqns; i++)
     {
         k3[i] = h*current[i];
         yt[i] = inp[i] + k3[i];
     } 
 
-    derivatives(yt, current);
+    Derivatives(yt, current);
     for (i = 0; i < n_eqns; i++)
     {
         k4[i] = h*current[i];
@@ -77,9 +80,9 @@ function RK(t, inp, out, h) {
 
 }
 
-function derivatives(i,o) {
+function Derivatives(i,o) {
 
-// assign input output
+    //Uses input and output to assign theta1, theta2, omega1, omega2 (angles and vels.)
 
     o[0] = i[1];
     var exp1 = -g * (2 * p1.mass + p2.mass) * Math.sin(p1.a);
@@ -100,15 +103,35 @@ function derivatives(i,o) {
     o[3] = calc2;
 }
 
+
+function UpdateInput(){
+
+
+    // const cb = document.getElementById('trailcheck');
+    // if (laststate != cb.checked){
+    // console.log(cb.checked); 
+    // laststate=cb.checked;
+
+    p1.l = document.getElementById('L1').value;
+    p2.l = document.getElementById('L2').value;
+    console.log(p1.mass);
+    // p1.mass = document.getElementById('M1').value;
+    // p2.mass = document.getElementById('M2').value;
+
+    play = document.getElementById('play');
+    play.onclick = function(event){}
+    
+}
+
 function UpdatePhysics() {
 
     //Update physics ? - might be able to make these changes directly but must be tested
 
-    // p1.acc = 0;
-    // p2.acc = 0;
+
+    // NEW POGGERS CODE
 
     t = Date.now() - prev_update;
-    console.log(t);
+    // console.log(t);
     prev_update = Date.now();
 
     input = [p1.a, p1.vel, p2.a, p2.vel];
@@ -119,6 +142,8 @@ function UpdatePhysics() {
     p2.a = output[2];
     p2.vel = output[3];
 
+
+    // REDUNDANT CODE
 
     //Physics without integeration
 
@@ -171,7 +196,6 @@ function UpdateCanvas() {
 
     function Clear() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        console.log('c');
         ctx.moveTo(p2.x, p2.y);
 
     }
@@ -194,7 +218,7 @@ function UpdateCanvas() {
     Clear();
 
     if (firstframe) {
-        // ctx.putImageData(img_data, 0, 0);
+        ctx.putImageData(img_data, 0, 0);
         ctx.moveTo(old_x, old_y);
         ctx.beginPath();
         ctx.lineTo(p2.x, p2.y);
@@ -203,7 +227,7 @@ function UpdateCanvas() {
         img_data = ctx.getImageData(0, 0, cw, ch);
     }
     else {
-        // ctx.putImageData(img_data, 0, 0);
+        ctx.putImageData(img_data, 0, 0);
         ctx.beginPath();
         ctx.moveTo(old_x, old_y);
         ctx.lineTo(p2.x, p2.y);
@@ -223,8 +247,10 @@ function UpdateFrame() {
     //UpdatePhysics and then UpdateCanvas
     UpdatePhysics();
     UpdateCanvas();
+    UpdateInput();
 
-    requestAnimationFrame(UpdateFrame);
+    if (!paused)
+        requestAnimationFrame(UpdateFrame);
 }
 
 requestAnimationFrame(UpdateFrame);
