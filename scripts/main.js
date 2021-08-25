@@ -7,9 +7,9 @@ const ch = 720;
 //Declaring temporary values for simulations
 var g = 9.8;
 var length = 150;
-var mass = 40;
-var a_1 = Math.PI/2 + 0.001;
-var a_2 = Math.PI/2 ;
+// var mass = 10;
+var a_1 = 5*Math.PI/2;
+var a_2 = Math.PI ;
 const anchor_x = 360;
 const anchor_y = 200;
 var t = 0;
@@ -19,7 +19,7 @@ var prev_update = Date.now();
 var kin_energy, pot_energy;
 firstframe = true;
 var paused = false;
-var img_data = ctx.getImageData(0, 0, cw, ch);;
+var img_data = ctx.getImageData(0, 0, cw, ch);
 var old_x;
 var old_y;
 var tickrate = 60;
@@ -35,9 +35,17 @@ var laststate;
 p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:10, acc:0 };
 p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:10, acc:0 };
 
+
+/**
+ * Runge-Kutta integrator to solve differential equations and improve accuracy
+ * @param {float} t   time
+ * @param {array} inp array of input vars
+ * @param {array} out array of output vars
+ * @param {float} h   stepsize
+ */
+
 function RK(t, inp, out, h) {
     //Either implement Runge-Kutta differential equation function or import existing algo
-    //Implement Runge-Kutta integration to provide more accurate angles
 
     var yt = [];
     var k1 = [], k2 = [], k3 = [], k4 = [];
@@ -46,7 +54,8 @@ function RK(t, inp, out, h) {
     xh = t + hh;
 
     //Values are hard-coded according to the Runge-Kutta integrator.
-
+    //Calls Derivatives 4 times and iterates through calculation for each variable
+    
     Derivatives(inp, current);
     for (i = 0; i < n_eqns; i++)
     {
@@ -76,9 +85,14 @@ function RK(t, inp, out, h) {
     } 
 
     return
-    //loop and input output
-
 }
+
+
+/**
+ * Calculates angles according to the physics formulae for the double pendulum
+ * @param {array} i input variables
+ * @param {array} o output variables
+ */
 
 function Derivatives(i,o) {
 
@@ -104,6 +118,9 @@ function Derivatives(i,o) {
 }
 
 
+/**
+ * Function to check UI inputs every update
+ */
 function UpdateInput(){
 
 
@@ -112,17 +129,20 @@ function UpdateInput(){
     // console.log(cb.checked); 
     // laststate=cb.checked;
 
-    p1.l = document.getElementById('L1').value;
-    p2.l = document.getElementById('L2').value;
+    
+    p1.l = parseInt(document.getElementById('L1').value);
+    p2.l = parseInt(document.getElementById('L2').value);
     console.log(p1.mass);
-    // p1.mass = document.getElementById('M1').value;
-    // p2.mass = document.getElementById('M2').value;
+    p1.mass = parseInt(document.getElementById('M1').value);
+    p2.mass = parseInt(document.getElementById('M2').value);
 
-    play = document.getElementById('play');
-    play.onclick = function(event){}
     
 }
 
+
+/**
+ * Function to Update physics for the double pendulum
+ */
 function UpdatePhysics() {
 
     //Update physics ? - might be able to make these changes directly but must be tested
@@ -184,22 +204,30 @@ function UpdatePhysics() {
 
 
     // Find formulae for energy and forces in the system
-    /*
-    kin_energy = 0.5 * p1.mass * p1.l * p1.l * p1.vel * p1.vel + 0.5 * p2.mass * (p1.l * p1.l * p1.vel * p1.vel + p2.l * p2.l * p2.vel * p2.vel + 2 * p1.l * p2.l * p1.vel * p2.vel * Math.cos(p1.a - p2.a));
-    pot_energy = -(p1.mass + p2.mass) * 9.8 * p1.l * Math.cos(p1.a) - p2.mass * 9.8 * p2.l * Math.cos(p2.a);
-    console.log("total: " + (pot_energy));*/
     
+    kin_energy = 0.5 * (p1.mass * p1.l * p1.l * p1.vel * p1.vel) + (0.5 * p2.mass * (p1.l * p1.l * p1.vel * p1.vel + p2.l * p2.l * p2.vel * p2.vel + 2 * p1.l * p2.l * p1.vel * p2.vel * Math.cos(p1.a - p2.a)));
+    pot_energy = (-p1.mass * g * p1.l * Math.cos(p1.a) - p2.mass * g * (p1.l * Math.cos(p1.a) + p2.l * Math.cos(p2.a)));
+    console.log("total: " + (pot_energy + kin_energy + (kin_energy - pot_energy) ));  
 }
 
+
+/**
+ * Update everything inside the canvas 
+ */
 function UpdateCanvas() {
     //Handle drawing of objects, images, trails, stats, etc (anything that needs to be drawn on canvas)
 
+    /**
+     * Clear canvas and reset to location of second object
+     */
     function Clear() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.moveTo(p2.x, p2.y);
-
     }
 
+    /**
+     * Draw the double pendulum and connecting lines in order
+     */
     function DrawObjects() {
         
         ctx.moveTo(anchor_x, anchor_y);
@@ -216,6 +244,10 @@ function UpdateCanvas() {
         ctx.fill();
     }
     Clear();
+
+
+    //Check first frame to add stroke 
+    //Use FrameID for this later
 
     if (firstframe) {
         ctx.putImageData(img_data, 0, 0);
@@ -242,15 +274,27 @@ function UpdateCanvas() {
 
 }
 
-
+/**
+ * Updates all aspects every frame
+ */
 function UpdateFrame() {
-    //UpdatePhysics and then UpdateCanvas
+    //Update All components
+    UpdateInput();
     UpdatePhysics();
     UpdateCanvas();
-    UpdateInput();
+    
 
     if (!paused)
         requestAnimationFrame(UpdateFrame);
 }
 
 requestAnimationFrame(UpdateFrame);
+
+
+// Code for Play and pause button; changes paused flag to control reqanimframe for updateFrame
+document.getElementById('play').addEventListener('click', function() {
+paused = !paused;
+if(!paused) {
+    requestAnimationFrame(UpdateFrame);
+}
+});
