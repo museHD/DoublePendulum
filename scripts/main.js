@@ -8,7 +8,7 @@ const ch = 720;
 var g = 9.8;
 var length = 150;
 // var mass = 10;
-var a_1 = 5*Math.PI/2;
+var a_1 = Math.PI/2;
 var a_2 = Math.PI ;
 const anchor_x = 360;
 const anchor_y = 200;
@@ -22,6 +22,8 @@ var paused = false;
 var img_data = ctx.getImageData(0, 0, cw, ch);
 var old_x;
 var old_y;
+const trail_length = 100;
+var path = new Array(trail_length);
 var tickrate = 60;
 const n_eqns = 4; //4 equations to solve;
 var input = new Array(n_eqns);
@@ -30,205 +32,137 @@ var current = new Array(n_eqns);
 var laststate;
 
 
+class DP {
+ 
+ static g = 9.8;
 
-//Either create objects to manage pendulums or manage variables only (object method might be easier to manage)
-p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:10, acc:0 };
-p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:10, acc:0 };
+    constructor(){
 
-
-/**
- * Runge-Kutta integrator to solve differential equations and improve accuracy
- * @param {float} t   time
- * @param {array} inp array of input vars
- * @param {array} out array of output vars
- * @param {float} h   stepsize
- */
-
-function RK(t, inp, out, h) {
-    //Either implement Runge-Kutta differential equation function or import existing algo
-
-    var yt = [];
-    var k1 = [], k2 = [], k3 = [], k4 = [];
-    var i;
-    hh = 0.5 * h;
-    xh = t + hh;
-
-    //Values are hard-coded according to the Runge-Kutta integrator.
-    //Calls Derivatives 4 times and iterates through calculation for each variable
-    
-    Derivatives(inp, current);
-    for (i = 0; i < n_eqns; i++)
-    {
-        k1[i] = h*current[i];
-        yt[i] = inp[i] + 0.5*k1[i];
+       
+        this.length = 150;
+        // var mass = 10;
+        this.a_1 = Math.PI/2;
+        this.a_2 = Math.PI ;
+        this.anchor_x = 360;
+        this.anchor_y = 200;
+        this.t = 0;
+        this.prev_update = Date.now();
+        this.p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
+        this.p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:3, acc:0 };
+        
     }
 
-    Derivatives(yt, current);
-    for (i = 0; i < n_eqns; i++)
-    {
-        k2[i] = h*current[i];
-        yt[i] = inp[i] + 0.5*k2[i];
-    } 
+    static RK(p1, p2, t, inp, out, h) {
 
-    Derivatives(yt, current);
-    for (i = 0; i < n_eqns; i++)
-    {
-        k3[i] = h*current[i];
-        yt[i] = inp[i] + k3[i];
-    } 
+        var yt = [];
+        var k1 = [], k2 = [], k3 = [], k4 = [];
+        var i;
+        var hh = 0.5 * h;
+        var xh = t + hh;
 
-    Derivatives(yt, current);
-    for (i = 0; i < n_eqns; i++)
-    {
-        k4[i] = h*current[i];
-        out[i] = inp[i] + k1[1]/6.0 + k2[i]/3.0 + k3[i]/3.0 + k4[i]/6.0;
-    } 
+        //Values are hard-coded according to the Runge-Kutta integrator.
+        //Calls Derivatives 4 times and iterates through calculation for each variable
+        
+        DP.Derivatives(inp, current, p1, p2);
+        for (i = 0; i < n_eqns; i++)
+        {
+            k1[i] = h*current[i];
+            yt[i] = inp[i] + 0.5*k1[i];
+        }
 
-    return
-}
+        DP.Derivatives(yt, current, p1, p2);
+        for (i = 0; i < n_eqns; i++)
+        {
+            k2[i] = h*current[i];
+            yt[i] = inp[i] + 0.5*k2[i];
+        } 
 
+        DP.Derivatives(yt, current, p1, p2);
+        for (i = 0; i < n_eqns; i++)
+        {
+            k3[i] = h*current[i];
+            yt[i] = inp[i] + k3[i];
+        } 
 
-/**
- * Calculates angles according to the physics formulae for the double pendulum
- * @param {array} i input variables
- * @param {array} o output variables
- */
+        DP.Derivatives(yt, current, p1, p2);
+        for (i = 0; i < n_eqns; i++)
+        {
+            k4[i] = h*current[i];
+            out[i] = inp[i] + k1[1]/6.0 + k2[i]/3.0 + k3[i]/3.0 + k4[i]/6.0;
+        } 
 
-function Derivatives(i,o) {
+        return
+    }
 
-    //Uses input and output to assign theta1, theta2, omega1, omega2 (angles and vels.)
-
-    o[0] = i[1];
-    var exp1 = -g * (2 * p1.mass + p2.mass) * Math.sin(p1.a);
-    var exp2 = -p2.mass * g * Math.sin(p1.a - 2 * p2.a);
-    var exp3 = (-2 * Math.sin(p1.a - p2.a) * p2.mass) * (p2.vel * p2.vel * p2.l + p1.vel * p1.vel * p1.l * Math.cos(p1.a - p2.a));
-    var den = p1.l * (2 * p1.mass + p2.mass - p2.mass * Math.cos(2 * p1.a - 2 * p2.a));
-    var calc1 = (exp1 + exp2 + exp3) / den;
-
-    o[1] = calc1;
-    o[2] = i[3];
-
-    var exp1 = 2 * Math.sin(p1.a - p2.a);
-    var exp2 = (p1.vel * p1.vel * p1.l * (p1.mass + p2.mass)) + g * (p1.mass + p2.mass) * Math.cos(p1.a);
-    var exp3 = p2.vel * p2.vel * p2.l * p2.mass * Math.cos(p1.a - p2.a);
-    var den = p2.l * (2 * p1.mass + p2.mass - p2.mass * Math.cos(2 * p1.a - 2 * p2.a));
-    var calc2 = (exp1 * (exp2 + exp3)) / den;
-
-    o[3] = calc2;
-}
-
-
-/**
- * Function to check UI inputs every update
- */
-function UpdateInput(){
-
-
-    // const cb = document.getElementById('trailcheck');
-    // if (laststate != cb.checked){
-    // console.log(cb.checked); 
-    // laststate=cb.checked;
-
-    
-    p1.l = parseInt(document.getElementById('L1').value);
-    p2.l = parseInt(document.getElementById('L2').value);
-    console.log(p1.mass);
-    p1.mass = parseInt(document.getElementById('M1').value);
-    p2.mass = parseInt(document.getElementById('M2').value);
-
-    
-}
-
-
-/**
- * Function to Update physics for the double pendulum
- */
-function UpdatePhysics() {
-
-    //Update physics ? - might be able to make these changes directly but must be tested
-
-
-    // NEW POGGERS CODE
-
-    t = Date.now() - prev_update;
-    // console.log(t);
-    prev_update = Date.now();
-
-    input = [p1.a, p1.vel, p2.a, p2.vel];
-
-    RK(t, input, output, 0.2);
-    p1.a = output[0];
-    p1.vel = output[1];
-    p2.a = output[2];
-    p2.vel = output[3];
-
-
-    // REDUNDANT CODE
-
-    //Physics without integeration
-
-    //angle_a_change = (-g * (p1.mass + p2.mass) * Math.sin(p1.a) - p2.mass * g * Math.sin(p1.a - p2.a) - 2 * Math.sin(p1.a - p2.a) * p2.mass * (p2.vel ** 2 * p2.l + p1.vel ** 2 * p1.l * Math.cos(p1.a - p2.a)))/p1.l*(2*p1.mass + p2.mass - p2.mass*Math.cos(2*p1.a - 2*p2.a))
-    // var exp1 = -g * (2 * p1.mass + p2.mass) * Math.sin(p1.a);
-    // var exp2 = -p2.mass * g * Math.sin(p1.a - 2 * p2.a);
-    // var exp3 = (-2 * Math.sin(p1.a - p2.a) * p2.mass) * (p2.vel * p2.vel * p2.l + p1.vel * p1.vel * p1.l * Math.cos(p1.a - p2.a));
-    // var den = p1.l * (2 * p1.mass + p2.mass - p2.mass * Math.cos(2 * p1.a - 2 * p2.a));
-    // p1.acc = (exp1 + exp2 + exp3) / den;
-    // //console.log(p1.vel);
-
-
-    // var exp1 = 2 * Math.sin(p1.a - p2.a);
-    // var exp2 = (p1.vel * p1.vel * p1.l * (p1.mass + p2.mass)) + g * (p1.mass + p2.mass) * Math.cos(p1.a);
-    // var exp3 = p2.vel * p2.vel * p2.l * p2.mass * Math.cos(p1.a - p2.a);
-    // var den = p2.l * (2 * p1.mass + p2.mass - p2.mass * Math.cos(2 * p1.a - 2 * p2.a));
-    // p2.acc = (exp1 * (exp2 + exp3)) / den;
-
-    //Update x and y values of pendulums to be drawn
-    p1.x = p1.l * Math.sin(p1.a) + anchor_x;
-    p1.y = p1.l * Math.cos(p1.a) + anchor_y;
-
-    //Previous location of second circle for path
-    old_x = p2.x;
-    old_y = p2.y;
-    
-    
-    p2.x = p2.l * Math.sin(p2.a) + p1.x;
-    p2.y = p2.l * Math.cos(p2.a) + p1.y;
-
-
-    // p2.vel += p2.acc;
-    // p1.vel += p1.acc;
-    // p1.a += p1.vel;
-
-    // p2.a += p2.vel;
-
-
-
-    // Find formulae for energy and forces in the system
-    
-    kin_energy = 0.5 * (p1.mass * p1.l * p1.l * p1.vel * p1.vel) + (0.5 * p2.mass * (p1.l * p1.l * p1.vel * p1.vel + p2.l * p2.l * p2.vel * p2.vel + 2 * p1.l * p2.l * p1.vel * p2.vel * Math.cos(p1.a - p2.a)));
-    pot_energy = (-p1.mass * g * p1.l * Math.cos(p1.a) - p2.mass * g * (p1.l * Math.cos(p1.a) + p2.l * Math.cos(p2.a)));
-    console.log("total: " + (pot_energy + kin_energy + (kin_energy - pot_energy) ));  
-}
-
-
-/**
- * Update everything inside the canvas 
- */
-function UpdateCanvas() {
-    //Handle drawing of objects, images, trails, stats, etc (anything that needs to be drawn on canvas)
 
     /**
-     * Clear canvas and reset to location of second object
+     * Calculates angles according to the physics formulae for the double pendulum
+     * @param {array} i input variables
+     * @param {array} o output variables
      */
-    function Clear() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.moveTo(p2.x, p2.y);
+
+    static Derivatives(i,o, p1, p2) {
+
+        //Uses input and output to assign theta1, theta2, omega1, omega2 (angles and vels.)
+
+
+        o[0] = i[1];
+        var exp1 = -this.g * (2 * p1.mass + p2.mass) * Math.sin(p1.a);
+        var exp2 = -p2.mass * this.g * Math.sin(p1.a - 2 * p2.a);
+        var exp3 = (-2 * Math.sin(p1.a - p2.a) * p2.mass) * (p2.vel * p2.vel * p2.l + p1.vel * p1.vel * p1.l * Math.cos(p1.a - p2.a));
+        var den = p1.l * (2 * p1.mass + p2.mass - p2.mass * Math.cos(2 * p1.a - 2 * p2.a));
+        var calc1 = (exp1 + exp2 + exp3) / den;
+
+        o[1] = calc1;
+        o[2] = i[3];
+
+        var exp1 = 2 * Math.sin(p1.a - p2.a);
+        var exp2 = (p1.vel * p1.vel * p1.l * (p1.mass + p2.mass)) + this.g * (p1.mass + p2.mass) * Math.cos(p1.a);
+        var exp3 = p2.vel * p2.vel * p2.l * p2.mass * Math.cos(p1.a - p2.a);
+        var den = p2.l * (2 * p1.mass + p2.mass - p2.mass * Math.cos(2 * p1.a - 2 * p2.a));
+        var calc2 = (exp1 * (exp2 + exp3)) / den;
+
+        o[3] = calc2;
     }
+
+
+    /**
+     * Function to Update physics for the double pendulum
+     */
+    UpdatePhysics() {
+
+        console.log(this.p2.x, this.p2.y);
+        //Update physics ? - might be able to make these changes directly but must be tested
+
+
+        t = Date.now() - prev_update;
+        prev_update = Date.now();
+
+        input = [this.p1.a, this.p1.vel, this.p2.a, this.p2.vel];
+
+        DP.RK(this.p1, this.p2, t, input, output, 0.2 );
+        this.p1.a = output[0];
+        this.p1.vel = output[1];
+        this.p2.a = output[2];
+        this.p2.vel = output[3];
+
+        this.p1.x = this.p1.l * Math.sin(this.p1.a) + anchor_x;
+        this.p1.y = this.p1.l * Math.cos(this.p1.a) + anchor_y;
+
+        //Previous location of second circle for path
+        old_x = this.p2.x;
+        old_y = this.p2.y;
+        
+        this.p2.x = this.p2.l * Math.sin(this.p2.a) + this.p1.x;
+        this.p2.y = this.p2.l * Math.cos(this.p2.a) + this.p1.y;
+
+    }
+
 
     /**
      * Draw the double pendulum and connecting lines in order
      */
-    function DrawObjects() {
+    DrawObjects() {
         
         ctx.moveTo(anchor_x, anchor_y);
         ctx.lineTo(p1.x, p1.y);
@@ -243,33 +177,97 @@ function UpdateCanvas() {
         ctx.arc(p2.x, p2.y, p2.r, 0, 2 * Math.PI);
         ctx.fill();
     }
+
+    //Draw trail for p1/p2
+    static DrawTrail(obj, thickness){
+        
+        //rightmost(length) value is latest, leftmost(0) value is oldest
+        path.shift();
+        var cords = {x:obj.x, y:obj.y, vel:Math.abs(obj.vel)};
+        path.push(cords);
+
+
+        for (var i = path.length - 1; i >= 0; i--) {
+            // console.log(path[i]);
+
+            if (typeof path[i]!= "undefined"){
+                ctx.beginPath();
+                ctx.arc(path[i].x, path[i].y, thickness, 0, 2 * Math.PI);                
+                ctx.fill();
+                // working code for interpolation
+                // ctx.beginPath();
+                // ctx.moveTo(path[i-1].x, path[i-1].y);
+                // ctx.lineTo(path[i].x, path[i].y);
+                // ctx.stroke();
+            }
+
+        }
+
+    }
+
+
+}
+
+
+
+
+
+/**
+ * Function to check UI inputs every update
+ */
+function UpdateInput(p1, p2){
+
+    
+    //Mass and rod length being read and changed    
+    p1.l = parseInt(document.getElementById('L1').value);
+    p2.l = parseInt(document.getElementById('L2').value);
+    console.log(p1.mass);
+    p1.mass = parseInt(document.getElementById('M1').value);
+    p2.mass = parseInt(document.getElementById('M2').value);
+
+}
+
+
+var pen = new DP();
+
+/**
+ * Update everything inside the canvas 
+ */
+function UpdateCanvas(p1,p2) {
+    //Handle drawing of objects, images, trails, stats, etc (anything that needs to be drawn on canvas)
+
+    /**
+     * Clear canvas and reset to location of second object
+     */
+    function Clear() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.moveTo(p2.x, p2.y);
+    }
+
+    /**
+     * Draw the double pendulum and connecting lines in order
+     */
+    function DrawObjects(p1,p2) {
+        
+        ctx.beginPath();
+        ctx.moveTo(anchor_x, anchor_y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, p1.r, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(p2.x, p2.y, p2.r, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+    
+
     Clear();
 
-
-    //Check first frame to add stroke 
-    //Use FrameID for this later
-
-    if (firstframe) {
-        ctx.putImageData(img_data, 0, 0);
-        ctx.moveTo(old_x, old_y);
-        ctx.beginPath();
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-        //ctx.fillRect(p2.x, p2.y, 5, 5);
-        img_data = ctx.getImageData(0, 0, cw, ch);
-    }
-    else {
-        ctx.putImageData(img_data, 0, 0);
-        ctx.beginPath();
-        ctx.moveTo(old_x, old_y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-        //ctx.fillRect(p2.x, p2.y, 5, 5);
-        img_data = ctx.getImageData(0, 0, cw, ch);
-    }
-
-
-    DrawObjects();
+    DrawObjects(p1,p2);
     firstframe = false;
 
 }
@@ -278,10 +276,11 @@ function UpdateCanvas() {
  * Updates all aspects every frame
  */
 function UpdateFrame() {
+    debugger;
     //Update All components
-    UpdateInput();
-    UpdatePhysics();
-    UpdateCanvas();
+    UpdateInput(pen.p1,pen.p2);
+    pen.UpdatePhysics();
+    UpdateCanvas(pen.p1,pen.p2);
     
 
     if (!paused)
@@ -294,6 +293,7 @@ requestAnimationFrame(UpdateFrame);
 // Code for Play and pause button; changes paused flag to control reqanimframe for updateFrame
 document.getElementById('play').addEventListener('click', function() {
 paused = !paused;
+// requestAnimationFrame(UpdateCanvas);
 if(!paused) {
     requestAnimationFrame(UpdateFrame);
 }
