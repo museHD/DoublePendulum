@@ -49,7 +49,13 @@ class DP {
         this.prev_update = Date.now();
         this.p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
         this.p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:3, acc:0 };
+        this.trail = true;
         
+    }
+
+    ResetPos(){
+        this.p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
+        this.p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:3, acc:0 };
     }
 
     static RK(p1, p2, t, inp, out, h) {
@@ -131,7 +137,6 @@ class DP {
      */
     UpdatePhysics() {
 
-        console.log(this.p2.x, this.p2.y);
         //Update physics ? - might be able to make these changes directly but must be tested
 
 
@@ -164,17 +169,18 @@ class DP {
      */
     DrawObjects() {
         
+        ctx.beginPath();
         ctx.moveTo(anchor_x, anchor_y);
-        ctx.lineTo(p1.x, p1.y);
+        ctx.lineTo(this.p1.x, this.p1.y);
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(p1.x, p1.y, p1.r, 0, 2 * Math.PI);
+        ctx.arc(this.p1.x, this.p1.y, this.p1.r, 0, 2 * Math.PI);
         ctx.fill();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
+        ctx.moveTo(this.p1.x, this.p1.y);
+        ctx.lineTo(this.p2.x, this.p2.y);
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(p2.x, p2.y, p2.r, 0, 2 * Math.PI);
+        ctx.arc(this.p2.x, this.p2.y, this.p2.r, 0, 2 * Math.PI);
         ctx.fill();
     }
 
@@ -190,7 +196,7 @@ class DP {
         for (var i = path.length - 1; i >= 0; i--) {
             // console.log(path[i]);
 
-            if (typeof path[i]!= "undefined"){
+            if (typeof path[i]!= "undefined" && typeof path[i-1] != "undefined"){
                 ctx.beginPath();
                 ctx.arc(path[i].x, path[i].y, thickness, 0, 2 * Math.PI);                
                 ctx.fill();
@@ -210,77 +216,71 @@ class DP {
 
 
 
-
-
 /**
  * Function to check UI inputs every update
  */
 function UpdateInput(p1, p2){
 
-    
+    p1 = selected.p1;
+    p2 = selected.p2;
+
+    //selccted variable to change which instance is being affected
+
+// if (change_selected)
+    // document.getElementById('L1').value = parseInt(p1.l);
+    // document.getElementById('L2').value = parseInt(p2.l);
+    // document.getElementById('M1').value = parseInt(p1.mass);
+    // document.getElementById('M2').value = parseInt(p2.mass);
+
     //Mass and rod length being read and changed    
     p1.l = parseInt(document.getElementById('L1').value);
     p2.l = parseInt(document.getElementById('L2').value);
-    console.log(p1.mass);
     p1.mass = parseInt(document.getElementById('M1').value);
     p2.mass = parseInt(document.getElementById('M2').value);
 
 }
 
 
-var pen = new DP();
+
 
 /**
- * Update everything inside the canvas 
+ * Clear canvas
  */
-function UpdateCanvas(p1,p2) {
-    //Handle drawing of objects, images, trails, stats, etc (anything that needs to be drawn on canvas)
-
-    /**
-     * Clear canvas and reset to location of second object
-     */
-    function Clear() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.moveTo(p2.x, p2.y);
-    }
-
-    /**
-     * Draw the double pendulum and connecting lines in order
-     */
-    function DrawObjects(p1,p2) {
-        
-        ctx.beginPath();
-        ctx.moveTo(anchor_x, anchor_y);
-        ctx.lineTo(p1.x, p1.y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(p1.x, p1.y, p1.r, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(p2.x, p2.y, p2.r, 0, 2 * Math.PI);
-        ctx.fill();
-    }
-    
-
-    Clear();
-
-    DrawObjects(p1,p2);
-    firstframe = false;
-
+function Clear() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+
+
+
+
+
+
+var pendulums = [pen = new DP()];
+var selected = pendulums[0];
+
+
 /**
- * Updates all aspects every frame
+ * Updates all components every frame
  */
 function UpdateFrame() {
-    debugger;
+
+    // debugger;
+
     //Update All components
-    UpdateInput(pen.p1,pen.p2);
-    pen.UpdatePhysics();
-    UpdateCanvas(pen.p1,pen.p2);
+    
+    UpdateInput();
+    
+
+    for (var i = pendulums.length - 1; i >= 0; i--) {
+        pendulums[i].UpdatePhysics();
+        Clear();
+        pendulums[i].DrawObjects();
+        if (pendulums[i].trail){
+            DP.DrawTrail(pendulums[i].p2, 2);
+        }
+    }
+
     
 
     if (!paused)
