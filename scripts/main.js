@@ -49,13 +49,24 @@ class DP {
         this.prev_update = Date.now();
         this.p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
         this.p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:3, acc:0 };
+        this.trail_length = 100;
+        this.path = new Array(this.trail_length);
         this.trail = true;
         
     }
 
     ResetPos(){
-        this.p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
-        this.p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:3, acc:0 };
+        this.p1.a = this.a_1;
+        this.p1.vel = 0;
+        this.p2.a = this.a_2;
+        this.p2.vel = 0;
+        this.p1.x = this.p1.l * Math.sin(this.p1.a) + anchor_x;
+        this.p1.y = this.p1.l * Math.cos(this.p1.a) + anchor_y;
+
+        this.p2.x = this.p2.l * Math.sin(this.p2.a) + this.p1.x;
+        this.p2.y = this.p2.l * Math.cos(this.p2.a) + this.p1.y;
+
+        this.path = new Array(this.trail_length);
     }
 
     static RK(p1, p2, t, inp, out, h) {
@@ -151,15 +162,14 @@ class DP {
         this.p2.a = output[2];
         this.p2.vel = output[3];
 
-        this.p1.x = this.p1.l * Math.sin(this.p1.a) + anchor_x;
-        this.p1.y = this.p1.l * Math.cos(this.p1.a) + anchor_y;
 
         //Previous location of second circle for path
         old_x = this.p2.x;
         old_y = this.p2.y;
         
-        this.p2.x = this.p2.l * Math.sin(this.p2.a) + this.p1.x;
-        this.p2.y = this.p2.l * Math.cos(this.p2.a) + this.p1.y;
+
+        // this.p1.a += this.p1.vel;
+        // this.p2.a += this.p2.vel;
 
     }
 
@@ -169,6 +179,10 @@ class DP {
      */
     DrawObjects() {
         
+        this.p1.x = this.p1.l * Math.sin(this.p1.a) + anchor_x;
+        this.p1.y = this.p1.l * Math.cos(this.p1.a) + anchor_y;
+        this.p2.x = this.p2.l * Math.sin(this.p2.a) + this.p1.x;
+        this.p2.y = this.p2.l * Math.cos(this.p2.a) + this.p1.y;
         ctx.beginPath();
         ctx.moveTo(anchor_x, anchor_y);
         ctx.lineTo(this.p1.x, this.p1.y);
@@ -185,7 +199,7 @@ class DP {
     }
 
     //Draw trail for p1/p2
-    static DrawTrail(obj, thickness){
+    static DrawTrail(obj, thickness, path){
         
         //rightmost(length) value is latest, leftmost(0) value is oldest
         path.shift();
@@ -221,6 +235,7 @@ class DP {
  */
 function UpdateInput(p1, p2){
 
+
     p1 = selected.p1;
     p2 = selected.p2;
 
@@ -237,64 +252,89 @@ function UpdateInput(p1, p2){
     p2.l = parseInt(document.getElementById('L2').value);
     p1.mass = parseInt(document.getElementById('M1').value);
     p2.mass = parseInt(document.getElementById('M2').value);
+    UpdateCanvas();
 
 }
 
 
 
 
-/**
- * Clear canvas
- */
-function Clear() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+
+function UpdateCanvas(){
+
+    /**
+     * Clear canvas
+     */
+    function Clear() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+
+    //Draw double pendulums for each instance
+    function DrawAllObjects(){
+        for (var i = pendulums.length - 1; i >= 0; i--) {
+            pendulums[i].DrawObjects();
+        }
+    }
+
+    //If instance has enabled trails, draw them
+    function DrawReqTrails(){
+        for (var i = pendulums.length - 1; i >= 0; i--) {
+            if (pendulums[i].trail){
+                DP.DrawTrail(pendulums[i].p2, 2, pendulums[i].path);
+            }
+        }
+    }
+
+    Clear();
+    DrawAllObjects();
+    DrawReqTrails();
+
+
 }
-
-
-
-
 
 
 
 var pendulums = [pen = new DP()];
 var selected = pendulums[0];
 
+function UpdateAllPhyscics(){
+        for (var i = pendulums.length - 1; i >= 0; i--) {
+        pendulums[i].UpdatePhysics();
+    }
+}
+
 
 /**
- * Updates all components every frame
+ * Updates all components every frame; Only updates physics if unpaused
  */
 function UpdateFrame() {
 
-    // debugger;
-
-    //Update All components
-    
     UpdateInput();
+    UpdateCanvas();
     
-
-    for (var i = pendulums.length - 1; i >= 0; i--) {
-        pendulums[i].UpdatePhysics();
-        Clear();
-        pendulums[i].DrawObjects();
-        if (pendulums[i].trail){
-            DP.DrawTrail(pendulums[i].p2, 2);
-        }
+    if (!paused){
+        UpdateAllPhyscics();
     }
 
-    
-
-    if (!paused)
-        requestAnimationFrame(UpdateFrame);
+    requestAnimationFrame(UpdateFrame); 
 }
+
 
 requestAnimationFrame(UpdateFrame);
 
 
 // Code for Play and pause button; changes paused flag to control reqanimframe for updateFrame
-document.getElementById('play').addEventListener('click', function() {
-paused = !paused;
-// requestAnimationFrame(UpdateCanvas);
-if(!paused) {
-    requestAnimationFrame(UpdateFrame);
+
+function Play(){
+    paused = !paused;
 }
-});
+
+document.getElementById('reset').addEventListener('click', function(){
+    for (var i = pendulums.length - 1; i >= 0; i--) {
+        pendulums[i].ResetPos();
+    }
+
+})
