@@ -59,6 +59,7 @@ class DP {
         this.trail_length = 100;
         this.path = new Array(this.trail_length);
         this.trail = true;
+        this.color = {r:Math.floor(Math.random() * 256), g:Math.floor(Math.random() * 256), b:Math.floor(Math.random() * 256)}
         
     }
 
@@ -303,7 +304,7 @@ function ChangeSelected(i){
     selected = pendulums[i];
     console.log('changed');
     g.children[i].classList.add("selected");
-
+    g.children[i].style.backgroundColor = `rgba(${pendulums[i].color.r},${pendulums[i].color.g},${pendulums[i].color.b},0.6)`;
     LoadInput();
 
 }
@@ -314,15 +315,17 @@ function UpdateInstanceList(){
     const g = document.getElementById('instances');
     for (let i = 0, len = g.children.length; i < len; i++)
     {
+        g.children[i].style.backgroundColor = `rgba(${pendulums[i].color.r},${pendulums[i].color.g},${pendulums[i].color.b},0.2)`;
         g.children[i].onclick = function(){
             let index = i;
 
             for (let i = 0, len = g.children.length; i < len; i++)
             {
                 g.children[i].classList.remove("selected");
-                            console.log(index);
-            
-            }ChangeSelected(index);
+                g.children[i].style.backgroundColor = `rgba(${pendulums[i].color.r},${pendulums[i].color.g},${pendulums[i].color.b},0.2)`;
+            }
+            ChangeSelected(index);
+
             // console.log(index);
             // ChangeSelected(index);
         }
