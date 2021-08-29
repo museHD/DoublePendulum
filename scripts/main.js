@@ -271,6 +271,7 @@ function UpdateInput(){
     p2.mass = parseInt(document.getElementById('M2').value);
     selected.a_1 = parseInt(document.getElementById('A1').value)*Math.PI/180;
     selected.a_2 = parseInt(document.getElementById('A2').value)*Math.PI/180;
+    selected.trail = document.getElementById('trailcheck').checked;
     if (paused){
         // console.log("changin live");
         document.getElementById('A1').oninput = function(){p1.a = parseInt(document.getElementById('A1').value)*Math.PI/180;};
@@ -299,6 +300,8 @@ function LoadInput(){
     console.log(selected.a_1);
     document.getElementById('A1').value = (selected.a_1)*180/Math.PI;
     document.getElementById('A2').value = (selected.a_2)*180/Math.PI;
+    document.getElementById('trailcheck').checked = selected.trail;
+
 
 }
 
@@ -307,7 +310,6 @@ function ChangeSelected(i){
     selected_index = i;
     const g = document.getElementById('instances');
     selected = pendulums[i];
-    console.log('changed');
     g.children[i].classList.add("selected");
     g.children[i].style.backgroundColor = `rgba(${pendulums[i].color.r},${pendulums[i].color.g},${pendulums[i].color.b},0.6)`;
     LoadInput();
@@ -316,7 +318,6 @@ function ChangeSelected(i){
 
 
 function UpdateInstanceList(){
-    console.log('update');
     const g = document.getElementById('instances');
     for (let i = 0, len = g.children.length; i < len; i++)
     {
@@ -339,6 +340,7 @@ function UpdateInstanceList(){
 
 
 function NewInstance(){
+    UpdateInstanceList();
     const g = document.getElementById('instances');
     pendulums.push((new DP()));
     instance = document.createElement("div");
@@ -349,10 +351,14 @@ function NewInstance(){
 }
 
 function DeleteInstance(){
+    // UpdateInstanceList();
     const g = document.getElementById('instances');
+    console.log(g.children, pendulums);
     if (g.children.length > 1){ 
+        
         g.removeChild(g.children[selected_index]);
         pendulums.pop(selected_index);
+        
         selected = pendulums[selected_index-1];
         if (selected_index > 0)
         selected_index -= 1;
