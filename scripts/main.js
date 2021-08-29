@@ -193,6 +193,8 @@ class DP {
         this.p1.y = this.p1.l * Math.cos(this.p1.a) + anchor_y;
         this.p2.x = this.p2.l * Math.sin(this.p2.a) + this.p1.x;
         this.p2.y = this.p2.l * Math.cos(this.p2.a) + this.p1.y;
+        ctx.fillStyle = 'rgba(0,0,0,1)';
+        ctx.strokeStyle = 'rgba(0,0,0,1)';        
         ctx.beginPath();
         ctx.moveTo(anchor_x, anchor_y);
         ctx.lineTo(this.p1.x, this.p1.y);
@@ -209,14 +211,16 @@ class DP {
     }
 
     //Draw trail for p1/p2
-    static DrawTrail(obj, thickness, path){
+    static DrawTrail(obj, thickness, path, color){
         
         //rightmost(length) value is latest, leftmost(0) value is oldest
         path.shift();
         var cords = {x:obj.x, y:obj.y, vel:Math.abs(obj.vel)};
         path.push(cords);
 
-
+        ctx.fillStyle = `rgba(${color.r},${color.g},${color.b},0.1)`;
+        ctx.strokeStyle = `rgba(${color.r},${color.g},${color.b},0.6)`;
+        // console.log(`rgba(${color.r},${color.g},${color.b},0.5)`);
         for (var i = path.length - 1; i >= 0; i--) {
             // console.log(path[i]);
 
@@ -225,11 +229,12 @@ class DP {
                 ctx.arc(path[i].x, path[i].y, thickness, 0, 2 * Math.PI);                
                 ctx.fill();
                 // working code for interpolation
-                // ctx.beginPath();
-                // ctx.moveTo(path[i-1].x, path[i-1].y);
-                // ctx.lineTo(path[i].x, path[i].y);
-                // ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(path[i-1].x, path[i-1].y);
+                ctx.lineTo(path[i].x, path[i].y);
+                ctx.stroke();
             }
+        // ctx.fillStyle = 'black';
 
         }
 
@@ -378,7 +383,7 @@ function UpdateCanvas(){
     function DrawReqTrails(){
         for (var i = pendulums.length - 1; i >= 0; i--) {
             if (pendulums[i].trail){
-                DP.DrawTrail(pendulums[i].p2, 2, pendulums[i].path);
+                DP.DrawTrail(pendulums[i].p2, 2, pendulums[i].path, pendulums[i].color);
             }
         }
     }
