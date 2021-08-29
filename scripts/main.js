@@ -36,7 +36,7 @@ var input = new Array(n_eqns);
 var output = new Array(n_eqns);
 var current = new Array(n_eqns);
 var laststate;
-
+var selected_index;
 
 class DP {
  
@@ -291,15 +291,17 @@ function LoadInput(){
     document.getElementById('M1').value = parseInt(p1.mass);
     document.getElementById('M2').value = parseInt(p2.mass);
     console.log(selected.a_1);
-    document.getElementById('A1').value = parseInt(selected.a_1)/Math.PI*180;
-    document.getElementById('A2').value = parseInt(selected.a_2)/Math.PI*180;
+    document.getElementById('A1').value = (selected.a_1)*180/Math.PI;
+    document.getElementById('A2').value = (selected.a_2)*180/Math.PI;
 
 }
 
 function ChangeSelected(i){
 
+    selected_index = i;
     const g = document.getElementById('instances');
     selected = pendulums[i];
+    console.log('changed');
     g.children[i].classList.add("selected");
 
     LoadInput();
@@ -308,23 +310,49 @@ function ChangeSelected(i){
 
 
 function UpdateInstanceList(){
+    console.log('update');
     const g = document.getElementById('instances');
     for (let i = 0, len = g.children.length; i < len; i++)
     {
         g.children[i].onclick = function(){
             let index = i;
+
             for (let i = 0, len = g.children.length; i < len; i++)
             {
                 g.children[i].classList.remove("selected");
-            }
-            console.log(index);
-            ChangeSelected(index);
+                            console.log(index);
+            
+            }ChangeSelected(index);
+            // console.log(index);
+            // ChangeSelected(index);
         }
     }
 }
 
 
+function NewInstance(){
+    const g = document.getElementById('instances');
+    pendulums.push((new DP()));
+    instance = document.createElement("div");
+    instance.classList.add("dp-instance");
+    instance.innerHTML = "instance" + pendulums.length;
+    instancesdisplay.appendChild(instance);
+    UpdateInstanceList();
+}
 
+function DeleteInstance(){
+    const g = document.getElementById('instances');
+    if (g.children.length > 1){ 
+        g.removeChild(g.children[selected_index]);
+        pendulums.pop(selected_index);
+        selected = pendulums[selected_index-1];
+        if (selected_index > 0)
+        selected_index -= 1;
+    }
+    UpdateInstanceList();
+    ChangeSelected(selected_index);
+
+}
 
 function UpdateCanvas(){
 
@@ -361,16 +389,13 @@ function UpdateCanvas(){
 
 
 
-var pendulums = [pen = new DP()];
-var selected = pendulums[0];
-
 //create html element
 
-instance1 = document.createElement("div");
-instance1.classList.add("dp-instance");
-instance1.innerHTML = "Instance1";
-instancesdisplay.appendChild(instance1);
+// instance1 = document.createElement("div");
+// instance1.classList.add("dp-instance");
+// instance1.innerHTML = "Instance1";
 // instancesdisplay.appendChild(instance1);
+// // instancesdisplay.appendChild(instance1);
 
 UpdateInstanceList();
 function UpdateAllPhyscics(){
@@ -411,3 +436,9 @@ document.getElementById('reset').addEventListener('click', function(){
     }
 
 })
+
+var pendulums = [];
+NewInstance();
+var selected = pendulums[0];
+
+LoadInput();

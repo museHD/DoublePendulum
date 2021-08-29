@@ -48,6 +48,10 @@
 	padding: 30px 0px;
 }
 
+.selected{
+	background: gray;
+}
+
 body{
 	margin: 0px;
 }
