@@ -1,31 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 	<title>Double Pendulum Simulation</title>
 	<script defer src="./scripts/main.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
 
-<div>
-	<div class="canvas-container">
-		<canvas id="canvas" width="720" height="720"></canvas>
+<div id="maindiv">
+
+	<div id="" class="instance-container column">
+		<h1>Instances</h1>
+		<hr>
+		<div id="instances"> </div>
+		<div id="instance-buttons">
+			<button id="newinstance" onclick="NewInstance()">Add Instance</button>
+		</div>
+
+
 	</div>
 
-	<button id="play" onclick="Play()">Play/Pause</button>
-	<button id="reset">Reset</button>
-	<label for="trail"><input type="checkbox" id="trailcheck" name="accept" value="yes"> Trail </label>
+	<div id="canvas-placeholder"></div>
 
-	L1
-	<input type="range" min="1" max="300" value="150" class="slider" id="L1">
-	L2
-	<input type="range" min="1" max="300" value="150" class="slider" id="L2">
-	M1
-	<input type="range" min="1" max="300" value="10" class="slider" id="M1">
-	M2
-	<input type="range" min="1" max="300" value="10" class="slider" id="M2">
-	
+	<div class="var-container column">
+
+		<h1>Simulation Controls</h1>
+		<hr>
+
+		<button id="play" onclick="Play()">Play/Pause</button>
+		<button id="reset">Reset</button>
+		<label for="trail"><input type="checkbox" id="trailcheck" name="accept" value="yes"> Trail </label>
+
+		<div id="inputs">
+			<div class="input"> 
+				<label>Length 1</label> <br>
+				<input name="l1"type="range" min="1" max="300" value="150" class="slider" id="L1"><br>
+			</div>
+
+			<div class="input"> Length 2 <br>
+				<input name="l2"type="range" min="1" max="300" value="150" class="slider" id="L2"><br> 
+			</div>
+
+			<div class="input"> Mass 1 <br>
+				<input name="m1"type="range" min="1" max="300" value="10" class="slider" id="M1"><br> 
+			</div>
+
+			<div class="input"> Mass 2 <br>
+				<input name="m2"type="range" min="1" max="300" value="10" class="slider" id="M2"><br> 
+			</div>
+
+			<div class="input"> Angle 1 <br>
+				<input name="a1"type="range" min="1" max="360" value="10" class="slider" id="A1"><br> 
+			</div>
+
+			<div class="input"> Angle 2 <br>
+				<input name="a2"type="range" min="1" max="360" value="10" class="slider" id="A2"><br> 
+			</div>
+		</div>
+
+	</div>
+
 </div>
 </body>
 </html>

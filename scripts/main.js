@@ -1,17 +1,23 @@
-//Reference to canvas
-const canvas = document.getElementById("canvas");
+//Reference to canvas and HTML elements
+const canvasplaceholder = document.getElementById("canvas-placeholder");
+const canvas = document.createElement("canvas");
+canvasplaceholder.replaceWith(canvas);
 const ctx = canvas.getContext("2d");
-const cw = 720;
-const ch = 720;
+const cw = 800;
+const ch = 800;
+canvas.width = cw;
+canvas.height = ch;
+canvas.classList.add("column", "canvas-container");
+const instancesdisplay = document.getElementById("instances");
 
 //Declaring temporary values for simulations
 var g = 9.8;
 var length = 150;
 // var mass = 10;
-var a_1 = Math.PI/2;
-var a_2 = Math.PI ;
-const anchor_x = 360;
-const anchor_y = 200;
+// var a_1 = Math.PI/2;
+// var a_2 = Math.PI ;
+const anchor_x = cw/2;
+const anchor_y = 0.25*ch;
 var t = 0;
 var prev_update = Date.now();
 
@@ -42,13 +48,14 @@ class DP {
         this.length = 150;
         // var mass = 10;
         this.a_1 = Math.PI/2;
-        this.a_2 = Math.PI ;
+        this.a_2 = Math.PI/2 ;
         this.anchor_x = 360;
         this.anchor_y = 200;
+        this,length = 150;
         this.t = 0;
         this.prev_update = Date.now();
-        this.p1 = { r: 10, a: a_1, l: length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
-        this.p2 = { r: 10, a: a_2, l: length, x: 0, y: 0, vel: 0, mass:3, acc:0 };
+        this.p1 = { r: 10, a: this.a_1, l: this.length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
+        this.p2 = { r: 10, a: this.a_2, l: this.length, x: 0, y: 0, vel: 0, mass:3, acc:0 };
         this.trail_length = 100;
         this.path = new Array(this.trail_length);
         this.trail = true;
@@ -60,9 +67,11 @@ class DP {
         this.p1.vel = 0;
         this.p2.a = this.a_2;
         this.p2.vel = 0;
+        // this.p1.a = this.a_1;
+        // this.p2.a = this.a_2;
         this.p1.x = this.p1.l * Math.sin(this.p1.a) + anchor_x;
         this.p1.y = this.p1.l * Math.cos(this.p1.a) + anchor_y;
-
+        console.log(this.a_1, this.a_2);
         this.p2.x = this.p2.l * Math.sin(this.p2.a) + this.p1.x;
         this.p2.y = this.p2.l * Math.cos(this.p2.a) + this.p1.y;
 
@@ -230,10 +239,12 @@ class DP {
 
 
 
+
+
 /**
  * Function to check UI inputs every update
  */
-function UpdateInput(p1, p2){
+function UpdateInput(){
 
 
     p1 = selected.p1;
@@ -252,12 +263,65 @@ function UpdateInput(p1, p2){
     p2.l = parseInt(document.getElementById('L2').value);
     p1.mass = parseInt(document.getElementById('M1').value);
     p2.mass = parseInt(document.getElementById('M2').value);
+    selected.a_1 = parseInt(document.getElementById('A1').value)*Math.PI/180;
+    selected.a_2 = parseInt(document.getElementById('A2').value)*Math.PI/180;
+    if (paused){
+        // console.log("changin live");
+        document.getElementById('A1').oninput = function(){p1.a = parseInt(document.getElementById('A1').value)*Math.PI/180;};
+        document.getElementById('A2').oninput = function(){p2.a = parseInt(document.getElementById('A2').value)*Math.PI/180;};
+    }
+    else{
+        document.getElementById('A1').oninput = "";
+        document.getElementById('A2').oninput = "";
+    }
     UpdateCanvas();
 
 }
 
+/**
+ * Takes values of instances and loads them to the HTML sliders
+ */
+function LoadInput(){
+
+    p1 = selected.p1;
+    p2 = selected.p2;
+
+    document.getElementById('L1').value = parseInt(p1.l);
+    document.getElementById('L2').value = parseInt(p2.l);
+    document.getElementById('M1').value = parseInt(p1.mass);
+    document.getElementById('M2').value = parseInt(p2.mass);
+    console.log(selected.a_1);
+    document.getElementById('A1').value = parseInt(selected.a_1)/Math.PI*180;
+    document.getElementById('A2').value = parseInt(selected.a_2)/Math.PI*180;
+
+}
+
+function ChangeSelected(i){
+
+    const g = document.getElementById('instances');
+    selected = pendulums[i];
+    g.children[i].classList.add("selected");
+
+    LoadInput();
+
+}
 
 
+function UpdateInstanceList(){
+    const g = document.getElementById('instances');
+    for (let i = 0, len = g.children.length; i < len; i++)
+    {
+        g.children[i].onclick = function(){
+            let index = i;
+            for (let i = 0, len = g.children.length; i < len; i++)
+            {
+                g.children[i].classList.remove("selected");
+            }
+            console.log(index);
+            ChangeSelected(index);
+        }
+    }
+}
 
 
 
@@ -300,6 +364,15 @@ function UpdateCanvas(){
 var pendulums = [pen = new DP()];
 var selected = pendulums[0];
 
+//create html element
+
+instance1 = document.createElement("div");
+instance1.classList.add("dp-instance");
+instance1.innerHTML = "Instance1";
+instancesdisplay.appendChild(instance1);
+// instancesdisplay.appendChild(instance1);
+
+UpdateInstanceList();
 function UpdateAllPhyscics(){
         for (var i = pendulums.length - 1; i >= 0; i--) {
         pendulums[i].UpdatePhysics();
