@@ -155,3 +155,8 @@ image-rendering: crisp-edges;
 	-ms-user-select: none;
 	text-align: center;
 }
+
+#trailcheck{
+	width: 20px;
+	height: 20px;
+}
