@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
 	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 	<title>Double Pendulum Simulation</title>
 	<script defer src="./scripts/main.js"></script>
@@ -30,7 +31,7 @@
 		<h1>Simulation Controls</h1>
 		<hr>
 
-		<button id="play" onclick="Play()">Play/Pause</button>
+		<div id="play" class="button paused" onclick="Play()"></div>
 		<button id="reset">Reset</button>
 		<label for="trail"><input type="checkbox" id="trailcheck" name="accept" value="yes"> Trail </label>
 

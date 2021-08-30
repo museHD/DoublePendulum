@@ -307,6 +307,7 @@ function LoadInput(){
 
 function ChangeSelected(i){
 
+    console.log(i);
     selected_index = i;
     const g = document.getElementById('instances');
     selected = pendulums[i];
@@ -323,17 +324,15 @@ function UpdateInstanceList(){
     {
         g.children[i].style.backgroundColor = `rgba(${pendulums[i].color.r},${pendulums[i].color.g},${pendulums[i].color.b},0.2)`;
         g.children[i].onclick = function(){
-            let index = i;
+            var index = i;
 
             for (let i = 0, len = g.children.length; i < len; i++)
             {
                 g.children[i].classList.remove("selected");
                 g.children[i].style.backgroundColor = `rgba(${pendulums[i].color.r},${pendulums[i].color.g},${pendulums[i].color.b},0.2)`;
             }
-            ChangeSelected(index);
-
             // console.log(index);
-            // ChangeSelected(index);
+            ChangeSelected(index);
         }
     }
 }
@@ -348,23 +347,28 @@ function NewInstance(){
     instance.innerHTML = "instance" + pendulums.length;
     instancesdisplay.appendChild(instance);
     UpdateInstanceList();
+    selected_index = pendulums.length-1;
+    ChangeSelected(selected_index);
+
 }
 
 function DeleteInstance(){
     // UpdateInstanceList();
+    ChangeSelected(selected_index);
     const g = document.getElementById('instances');
     console.log(g.children, pendulums);
     if (g.children.length > 1){ 
         
         g.removeChild(g.children[selected_index]);
-        pendulums.pop(selected_index);
-        
-        selected = pendulums[selected_index-1];
-        if (selected_index > 0)
-        selected_index -= 1;
+        pendulums.splice(selected_index,1);
+        // selected_index -= 1;
+        // selected = pendulums[selected_index];
+        // if (selected_index > 0){
+        // selected_index -= 1;}
     }
+    ChangeSelected(pendulums.length-1);
     UpdateInstanceList();
-    ChangeSelected(selected_index);
+    
 
 }
 
@@ -402,15 +406,6 @@ function UpdateCanvas(){
 }
 
 
-
-//create html element
-
-// instance1 = document.createElement("div");
-// instance1.classList.add("dp-instance");
-// instance1.innerHTML = "Instance1";
-// instancesdisplay.appendChild(instance1);
-// // instancesdisplay.appendChild(instance1);
-
 UpdateInstanceList();
 function UpdateAllPhyscics(){
         for (var i = pendulums.length - 1; i >= 0; i--) {
@@ -441,6 +436,9 @@ requestAnimationFrame(UpdateFrame);
 // Code for Play and pause button; changes paused flag to control reqanimframe for updateFrame
 
 function Play(){
+    btn = document.getElementById("play");
+    if (!paused) {btn.classList.remove('paused');}
+    else {btn.classList.add('paused');}
     paused = !paused;
 }
 
