@@ -23,12 +23,19 @@
 }
 
 .var-container{
+	text-align: center;
+		-webkit-user-select: none;
+	-moz-user-select: none; 
+	-ms-user-select: none;
 	display: inline-block;
 	border: solid gray 2px;
 	border-radius: 15px;
 	width: 20%;
 	padding: 30px;
+	height: 860px;
+
 }
+
 
 .column{
 	float: left;
@@ -53,7 +60,7 @@
 
 .input{
 	font-size: 18px;
-	padding: 30px 0px;
+	margin: 25px 0px;
 }
 
 .selected{
@@ -69,13 +76,25 @@ h1{
 	text-align: center;
 }
 
+#reset{
+	
+	display:inline-block;
+	margin: 10px;
+  box-sizing: border-box;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+}
+
 .button {
+	display:inline-block;
+	margin: 10px;
   box-sizing: border-box;
   width: 0;
-  height: 74px;
+  height: 60px;
   border-style: solid;
-  border-width: 37px 0 37px 60px;
-  border-color: transparent transparent transparent #202020;
+  border-width: 30px 0 30px 60px;
+  border-color: transparent transparent transparent #000000;
   cursor: pointer;
   will-change: border-width;
   transition: all 0.2s ease;
@@ -89,19 +108,47 @@ h1{
 }
 
 .radius {
+ 
+	user-select: none; 
+	font-weight: 800;
   border-radius:50%;
+  line-height: 50px;
+  transition: all 0.2s ease;
+  
 }
 
-.plus {
+.radius:hover {
+  background: #404040;
+}
+
+.plus{
+	font-size: 28px;
+	text-align: center;
+	vertical-align: text-top;
+	color: white;
+	cursor: pointer;
   display:inline-block;
   width:50px;
   height:50px;
-  
-  background:
-    linear-gradient(#fff,#fff),
-    linear-gradient(#fff,#fff),
-    #000;
-  background-position:center;
-  background-size: 50% 2px,2px 50%; /*thickness = 2px, length = 50% (25px)*/
-  background-repeat:no-repeat;
+  background: black;
+}
+
+.minus{
+	font-size: 28px;	
+	text-align: center;
+	vertical-align: text-top;
+	color: white;
+	cursor: pointer;
+  display:inline-block;
+  width:50px;
+  height:50px;
+  background: black;
+}
+
+
+#instance-buttons{
+		-webkit-user-select: none;
+	-moz-user-select: none; 
+	-ms-user-select: none;
+	text-align: center;
 }

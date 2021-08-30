@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="icon" href="favicon.ico" type="image/x-icon">
+	<link rel="icon" href="./imgs/favicon.ico" type="image/x-icon">
 	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 	<title>Double Pendulum Simulation</title>
 	<script defer src="./scripts/main.js"></script>
@@ -16,8 +16,8 @@
 		<hr>
 		
 		<div id="instance-buttons">
-			<button id="newinstance" onclick="NewInstance()">Add Instance</button>
-			<button id="delinstance" onclick="DeleteInstance()">Remvove Instance</button>
+			<div class="plus radius" id="newinstance" onclick="NewInstance()"> &#43; </div>
+			<div class="minus radius" id="delinstance" onclick="DeleteInstance()"> &#8211; </div>
 		</div>
 		
 		<div id="instances"> </div>
@@ -31,11 +31,18 @@
 		<h1>Simulation Controls</h1>
 		<hr>
 
-		<div id="play" class="button paused" onclick="Play()"></div>
-		<button id="reset">Reset</button>
-		<label for="trail"><input type="checkbox" id="trailcheck" name="accept" value="yes"> Trail </label>
+		<div id="instance-buttons">
+
+			<div id="play" class="button paused" onclick="Play()"></div>
+			<div id="reset"> <img id="reset" src="./imgs/reset.png"> </div>
+		</div>
 
 		<div id="inputs">
+
+			<div class="input"> 
+				<label for="trail"><input type="checkbox" id="trailcheck" name="accept" value="yes"> Trail </label>
+			</div>
+
 			<div class="input"> 
 				<label>Length 1</label> <br>
 				<input name="l1"type="range" min="1" max="300" value="150" class="slider" id="L1"><br>
