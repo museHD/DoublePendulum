@@ -250,6 +250,10 @@ class DP {
  */
 function UpdateInput(){
 
+    for (var i = sliders.length - 1; i >= 0; i--) {
+        sliders[i].previousElementSibling.innerHTML = sliders[i].value + '<br>';
+    }
+
     p1 = selected.p1;
     p2 = selected.p2;
 
@@ -292,9 +296,12 @@ function LoadInput(){
     document.getElementById('A2').value = (selected.a_2)*180/Math.PI;
     document.getElementById('trailcheck').checked = selected.trail;
 
-
 }
 
+/**
+ * Change the selected element and instance
+ * @param {int} i index of instance
+ */
 function ChangeSelected(i){
 
     console.log(i);
@@ -308,6 +315,9 @@ function ChangeSelected(i){
 }
 
 
+/**
+ * Go through html list and update colour of all elements
+ */
 function UpdateInstanceList(){
     const g = document.getElementById('instances');
     for (let i = 0, len = g.children.length; i < len; i++)
@@ -328,6 +338,9 @@ function UpdateInstanceList(){
 }
 
 
+/**
+ * Create new DP Instance and add to array
+ */
 function NewInstance(){
     UpdateInstanceList();
     const g = document.getElementById('instances');
@@ -342,6 +355,9 @@ function NewInstance(){
 
 }
 
+/**
+ * Delete selected instance and element
+ */
 function DeleteInstance(){
     // UpdateInstanceList();
     ChangeSelected(selected_index);
@@ -362,6 +378,9 @@ function DeleteInstance(){
 
 }
 
+/**
+ * Update canvas
+ */
 function UpdateCanvas(){
 
     /**
@@ -396,13 +415,17 @@ function UpdateCanvas(){
 }
 
 
-UpdateInstanceList();
+/**
+ * Go through all DPs and update physics
+ */
 function UpdateAllPhyscics(){
         for (var i = pendulums.length - 1; i >= 0; i--) {
         pendulums[i].UpdatePhysics();
     }
 }
 
+
+UpdateInstanceList();
 const perf = document.getElementById('performance');
 
 /**
@@ -417,13 +440,16 @@ function UpdateFrame() {
     if (!paused){
         UpdateAllPhyscics();
     }
+
+    //Frame Time Info
     t1 = performance.now();
-    perf.innerHTML = `Frame Time: ${(t1-t0).toFixed(3)} ms`;
+    perf.innerHTML = `${(t1-t0).toFixed(3)}`;
 
     requestAnimationFrame(UpdateFrame); 
 }
 
 
+//Call first frame
 requestAnimationFrame(UpdateFrame);
 
 
@@ -443,9 +469,14 @@ document.getElementById('reset').addEventListener('click', function(){
 
 })
 
+
+// Used in UpdateInput
+var sliders = document.getElementsByClassName("slider");
+
+
+//Initiating instances
 var pendulums = [];
 NewInstance();
 var selected = pendulums[0];
 
 LoadInput();
-performance.now();
