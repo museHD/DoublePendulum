@@ -245,25 +245,15 @@ class DP {
 }
 
 
-
-
-
 /**
  * Function to check UI inputs every update
  */
 function UpdateInput(){
 
-
     p1 = selected.p1;
     p2 = selected.p2;
 
     //selccted variable to change which instance is being affected
-
-// if (change_selected)
-    // document.getElementById('L1').value = parseInt(p1.l);
-    // document.getElementById('L2').value = parseInt(p2.l);
-    // document.getElementById('M1').value = parseInt(p1.mass);
-    // document.getElementById('M2').value = parseInt(p2.mass);
 
     //Mass and rod length being read and changed    
     p1.l = parseInt(document.getElementById('L1').value);
@@ -274,7 +264,6 @@ function UpdateInput(){
     selected.a_2 = parseInt(document.getElementById('A2').value)*Math.PI/180;
     selected.trail = document.getElementById('trailcheck').checked;
     if (paused){
-        // console.log("changin live");
         document.getElementById('A1').oninput = function(){p1.a = parseInt(document.getElementById('A1').value)*Math.PI/180;};
         document.getElementById('A2').oninput = function(){p2.a = parseInt(document.getElementById('A2').value)*Math.PI/180;};
     }
