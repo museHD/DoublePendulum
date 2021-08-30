@@ -31,6 +31,7 @@ var old_y;
 const trail_length = 100;
 var path = new Array(trail_length);
 var tickrate = 60;
+var t0, t1 = 0;
 const n_eqns = 4; //4 equations to solve;
 var input = new Array(n_eqns);
 var output = new Array(n_eqns);
@@ -413,11 +414,13 @@ function UpdateAllPhyscics(){
     }
 }
 
+const perf = document.getElementById('performance');
 
 /**
  * Updates all components every frame; Only updates physics if unpaused
  */
 function UpdateFrame() {
+    t0 = performance.now();
 
     UpdateInput();
     UpdateCanvas();
@@ -425,6 +428,8 @@ function UpdateFrame() {
     if (!paused){
         UpdateAllPhyscics();
     }
+    t1 = performance.now();
+    perf.innerHTML = `Frame Time: ${(t1-t0).toFixed(3)} ms`;
 
     requestAnimationFrame(UpdateFrame); 
 }
@@ -454,3 +459,4 @@ NewInstance();
 var selected = pendulums[0];
 
 LoadInput();
+performance.now();
