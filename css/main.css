@@ -77,7 +77,10 @@ h1{
 }
 
 #reset{
-	
+	image-rendering: -moz-crisp-edges;
+image-rendering: -o-crisp-edges; 
+image-rendering: -webkit-optimize-contrast; 
+image-rendering: crisp-edges;
 	display:inline-block;
 	margin: 10px;
   box-sizing: border-box;
