@@ -1,4 +1,20 @@
-<h1 align="center"> Double Pendulum Simulation</h1>
+<div align="center">
+
+<a href="https://musehd.github.io/DoublePendulum/">
+  <img src="imgs/favicon.ico" alt="Logo" width="200">
+</a>
+
+  <h3 align="center">Double Pendulum Simulation</h3>
+
+  <p align="center">
+    <em>Interactive website that simulates the chaotic physics system of a Double Pendulum</em>
+    <br />
+    <a href="https://github.com/museHD/DoublePendulum/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/museHD/DoublePendulum/issues">Request Feature</a>
+  </p>
+</div>
+
 
 ## About the Project:
 This is a double pendulum simulation written in JavaScript for a Year 11 Software Design & Development Assessment. 
@@ -6,7 +22,9 @@ This is a double pendulum simulation written in JavaScript for a Year 11 Softwar
 It simulates a chaotic physics system where a pendulum is attached to the end of another pendulum.
 The length of these pendulums and the angle they are released at can be customised using the UI. The simulation uses the Runge-Kutta differential equation solver in order to provide relatively accurate results. 
 
-Although the project has been assessed, it's still very interesting to play around with and can be improved quite a lot. If you are interested in improving it, see <a href="#contributing">Contributing.</a>
+Although the project has been assessed, it's still very interesting to play around with and can be improved quite a lot. Please feel free to leave any feedback! ❤️
+
+If you are interested in improving it, see <a href="#contributing">Contributing.</a>
 
 
 ## Getting Started
