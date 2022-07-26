@@ -52,7 +52,6 @@ class DP {
         this.a_2 = Math.PI/2 ;
         this.anchor_x = 360;
         this.anchor_y = 200;
-        this,length = 150;
         this.t = 0;
         this.prev_update = Date.now();
         this.p1 = { r: 10, a: this.a_1, l: this.length, x: 0, y: 0, vel: 0, mass:5, acc:0 };
