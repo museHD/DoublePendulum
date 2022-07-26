@@ -41,11 +41,11 @@ Simply open up `index.html` in a browser
 
 ### Usage
 * The Panel on the left allows you to create, delete and select between Double Pendulum instances.
-* The Panel on the right allows you to change properties such as mass, length, and starting angle of each component of the selected instance.
+* The Panel on the right allows you to change properties such as mass, length and starting angle of each component of the selected instance.
 You can also start and stop the simulation using the buttons at the top
 
 ## Contributing
 Please feel free to raise issues and suggest changes to the project.
-Although it has been submitted, it can be improved through code optimsation and UI changes.
+Although it has been submitted, it can be improved through code optimisation and UI changes.
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-javascript.svg)](https://forthebadge.com)
