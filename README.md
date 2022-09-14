@@ -26,6 +26,14 @@ Although the project has been assessed, it's still very interesting to play arou
 
 If you are interested in improving it, see <a href="#contributing">Contributing.</a>
 
+### Assessment Update:
+
+"Outstanding! Extremely complex and functional..."
+
+Program Mark: 60/60 :)  
+Documentation Mark: 47/60 ;(  
+Total: 107/120
+
 
 ## Getting Started
 
