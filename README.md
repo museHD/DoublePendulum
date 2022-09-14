@@ -52,6 +52,10 @@ Simply open up `index.html` in a browser
 * The Panel on the right allows you to change properties such as mass, length and starting angle of each component of the selected instance.
 You can also start and stop the simulation using the buttons at the top
 
+## Example
+![Screenshot 2022-09-14 121329 (Small)](https://user-images.githubusercontent.com/57558058/190043287-a3401e20-c03b-4c6e-97eb-832c69f076b0.png)
+
+
 ## Contributing
 Please feel free to raise issues and suggest changes to the project.
 Although it has been submitted, it can be improved through code optimisation and UI changes.
